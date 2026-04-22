@@ -14,6 +14,8 @@ All Jira config (project, board, custom fields, sprint convention) lives in `pro
 
 If config is missing, ask the user and update `profile.md` so future sessions don't re-ask.
 
+**Customization:** This skill is a starting boilerplate. After using it a few times, feel free to ask the agent to update it — add output formats, title conventions, sprint naming patterns, or anything that fits your working style. The skill file is yours to evolve.
+
 ---
 
 ## Operation: Init Sprint

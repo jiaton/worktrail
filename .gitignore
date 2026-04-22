@@ -37,6 +37,7 @@ skills/*.md
 !skills/convention-audit.md
 !skills/initialize-kb.md
 !skills/glean-knowledge-cache.md
+!skills/jira.md
 
 # Playwright MCP artifacts
 .playwright-mcp/

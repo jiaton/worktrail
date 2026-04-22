@@ -58,6 +58,7 @@ After every ~10 file operations, suggest running the convention audit (`skills/c
 
 ## File Creation Checklist
 
+- [ ] **Date resolved** — before creating any file that requires a date in its path or front-matter, resolve the current date and timezone via `date`. Do not assume or ask the user.
 - [ ] Path and filename match the naming convention in `README.md`
 - [ ] YAML front-matter has all required common fields: `title`, `date`, `tags`, `category`, `summary`, `related`, `needs-split`
 - [ ] No `{{placeholder}}` tokens remain — all resolved from `profile.md` front-matter

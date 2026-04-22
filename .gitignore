@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Editor / tool config
+.kiro/
+
+# Temporary files
+tmp/
+
+# Personal profile (use starter-kit/profile.md as template)
+/profile.md
+
+# Personal content — keep structure (.gitkeep) but exclude actual entries
+daily-tasks/**/*.md
+!daily-tasks/.gitkeep
+
+projects/working-on/*/
+!projects/working-on/.gitkeep
+
+projects/finished/*/
+!projects/finished/.gitkeep
+
+people/*.md
+!people/.gitkeep
+
+personal-workflows/interactions/*.md
+!personal-workflows/interactions/.gitkeep
+
+personal-workflows/mr-reviews/*.md
+!personal-workflows/mr-reviews/.gitkeep
+
+personal-workflows/performance-review/
+
+# Personal skills — generic skills (convention-audit, initialize-kb, glean-knowledge-cache) are tracked
+skills/*.md
+!skills/.gitkeep
+!skills/convention-audit.md
+!skills/initialize-kb.md
+!skills/glean-knowledge-cache.md
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Local scripts
+scripts/

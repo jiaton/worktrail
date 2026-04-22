@@ -2,6 +2,8 @@
 
 An AI-native knowledge base for engineers. You talk to your AI agent in natural language — it handles all file operations, querying, and cross-referencing using markdown files and YAML front-matter.
 
+![Project Overview](poster.png)
+
 ## Why
 
 - **Never lose context.** Projects, interactions, reviews, and daily work are structured and searchable. Come back from vacation and ramp up in minutes.

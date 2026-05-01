@@ -39,6 +39,11 @@ skills/*.md
 !skills/glean-knowledge-cache.md
 !skills/jira.md
 
+# PNG screenshots (temp testing artifacts)
+*.png
+!icons/*.png
+!poster.png
+
 # Playwright MCP artifacts
 .playwright-mcp/
 

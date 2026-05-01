@@ -58,6 +58,8 @@ Everything above is triggered by natural language. The agent decides which files
 3. Answer a few questions (company, team, role).
 4. Start talking — "log my tasks today", "start a new project", "init my sprint".
 
+For **Kiro CLI** users, the setup also creates `~/.kiro/skills/worktrail/SKILL.md` — a bridge skill that auto-loads your KB context every session, regardless of working directory. **Claude Code**, **Cursor**, and other agents get equivalent bridge files (`CLAUDE.md`, `.cursorrules`) auto-detected during setup. If you add new skills later, say "update agent bridges" to regenerate the skill index.
+
 ## Conventions
 
 The full convention reference (naming patterns, YAML schemas, file size limits, project lifecycle) lives in the [AGENTS.md](AGENTS.md) and is designed for agent consumption. The short version:

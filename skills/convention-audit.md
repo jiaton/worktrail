@@ -83,6 +83,19 @@ Hard limit (flag as violation):
 
 Scan all files **except** `templates/` for unresolved `{{...}}` tokens. Flag each with file path and line number.
 
+### Step 7: Verify Agent Bridge Sync
+
+Check that agent bridge files are in sync with `skills/*.md`:
+
+1. Scan `skills/*.md` front-matter → build expected skill index (title + trigger per file)
+2. For each detected agent bridge:
+   - Kiro: `~/.kiro/skills/worktrail/SKILL.md`
+   - Claude: `CLAUDE.md` in KB root
+   - Cursor: `.cursorrules` in KB root
+3. Parse the skill index table in each bridge file
+4. Compare: flag if a skill exists in `skills/` but is missing from the bridge, or if the bridge references a deleted skill
+5. If out of sync → offer to regenerate (run `initialize-kb.md` Step 7)
+
 ## Output Format
 
 ```
@@ -119,6 +132,12 @@ Stale flag: {list}
 ### 6. Unresolved Placeholders
 Status: PASS | FAIL
 - {file-path}:{line}: {match}
+
+### 7. Agent Bridge Sync
+Status: PASS | FAIL
+Missing from bridge: {list of skill files not in bridge}
+Stale in bridge: {list of bridge entries with no matching skill file}
+Bridges checked: {list of detected bridge files}
 
 ---
 Overall: PASS | FAIL | Total violations: {n} | Action required: {yes|no}

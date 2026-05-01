@@ -37,8 +37,8 @@ If you make any structural change (rename directories, add new file types, chang
 
 | User intent | Action |
 |-------------|--------|
-| Log today's tasks / meetings / notes | Create or update `daily-tasks/{YYYY}/{MM}/{YYYY-MM-DD}.md` |
-| Record work on a project | Create or update `projects/working-on/{slug}/{YYYY-MM-DD}.md` |
+| Log today's tasks / meetings / notes | Create or update `daily-tasks/{YYYY}/{MM}/{YYYY-MM-DD}.md` **+ append to Notion** (see `skills/jira.md` § Notion Daily Tasks Sync) |
+| Record work on a project | Create or update `projects/working-on/{slug}/{YYYY-MM-DD}.md` **+ append to Notion** (see `skills/jira.md` § Notion Daily Tasks Sync) |
 | Start a new project | Create `projects/working-on/{slug}/context.md` |
 | Record a staging event | Create `projects/working-on/{slug}/staging-{stage}-{YYYY-MM-DD}.md` |
 | Close out a project | Create `lessons-{YYYY-MM-DD}.md`, move dir to `projects/finished/{YYYY}/{slug}/` |
@@ -46,11 +46,14 @@ If you make any structural change (rename directories, add new file types, chang
 | Log an interaction | Create `personal-workflows/interactions/{person-slug}-{YYYY-MM-DD}.md` |
 | Add/update a person note | Create or update `people/{person-slug}.md` |
 | Define a new skill | Create `skills/{skill-slug}.md` |
+| Update agent bridges | Re-scan `skills/*.md` front-matter, regenerate all bridge files (see `skills/initialize-kb.md` Step 7) |
 | Add/update a tool integration | Update `profile.md` `## Tools` section; if the tool enables a workflow, offer to create a skill |
 | Query stored knowledge | Use `find` / `grep` on front-matter fields |
 | Audit conventions | Execute `skills/convention-audit.md` |
 
 When intent is ambiguous, ask one clarifying question before acting.
+
+When unsure about people's full names, roles, org structure, or company knowledge, search Glean or Confluence user search before guessing. Check `people/` files first for cached info. Use Confluence user search for account IDs when writing Confluence pages with `@` mentions.
 
 After every ~10 file operations, suggest running the convention audit (`skills/convention-audit.md`). Don't block — just mention it.
 

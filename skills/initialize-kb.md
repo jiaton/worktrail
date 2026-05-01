@@ -104,15 +104,52 @@ personal-workflows/interactions/.gitkeep
 people/.gitkeep
 ```
 
-### Step 7: Confirm & Next Steps
+### Step 7: Create Agent Bridge Skill
+
+Scan `skills/*.md` to build the skill index dynamically:
+
+```
+for each file in skills/*.md:
+  read YAML front-matter → extract title, trigger
+  add row: { file: basename, title, trigger }
+```
+
+Then create the bridge file for the user's AI agent:
+
+| Agent | Bridge location | Format |
+|---|---|---|
+| Kiro CLI | `~/.kiro/skills/worktrail/SKILL.md` | Kiro SKILL.md with `---name/description---` front-matter |
+| Claude Code | `~/Documents/worktrail/CLAUDE.md` | Plain markdown (Claude reads from working dir) |
+| Cursor | `~/Documents/worktrail/.cursorrules` | Plain markdown |
+| Other | `~/Documents/worktrail/AGENTS.md` | Already exists — append skill index |
+
+Auto-detect which agents are installed:
+- `~/.kiro/` exists → create Kiro bridge
+- `claude` command exists → create CLAUDE.md
+- `~/.cursor/` exists → create .cursorrules
+- Always update AGENTS.md (universal fallback)
+
+The bridge content for all agents follows the same template:
+
+1. **Boot sequence:** Read `profile.md` and `AGENTS.md` on every session
+2. **Skill index:** Table generated from scanning `skills/*.md` front-matter (NOT hardcoded)
+3. **Key paths:** daily tasks, projects, people directories
+4. **Rules:** no credentials in files, resolve dates, suggest audits
+
+When the user adds a new skill later, re-scan and regenerate the bridge(s).
+
+### Step 8: Confirm & Next Steps
 
 > "You're all set! Here's what I created:"
 > - `profile.md` — your config and tools
 > - Directory structure — ready for content
 > - Skills: {list created skill files, or "none yet"}
+> - Agent bridges: {list which bridges were created based on detected agents}
 >
 > "Try these:"
 > - "Log my tasks for today"
 > - "Start a new project called ..."
 > - "Init my sprint"
 > - "Record a 1:1 with ..."
+>
+> "When you add new skills, say 'update agent bridges' to regenerate the skill index."

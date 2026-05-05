@@ -53,7 +53,7 @@ Flag any file whose path does not conform.
 
 ### Step 3: Validate Front-Matter Schemas
 
-Check all `.md` files **except** `README.md`, `AGENTS.md`, `CLAUDE.md`, and `profile.md` (which has its own schema).
+Check all `.md` files **except** `README.md`, `AGENTS.md`, and `profile.md` (which has its own schema).
 
 Required common fields: `title`, `date`, `tags`, `category`, `summary`.
 
@@ -88,13 +88,10 @@ Scan all files **except** `templates/` for unresolved `{{...}}` tokens. Flag eac
 Check that agent bridge files are in sync with `skills/*.md`:
 
 1. Scan `skills/*.md` front-matter → build expected skill index (title + trigger per file)
-2. For each detected agent bridge:
-   - Kiro: `~/.kiro/skills/worktrail/SKILL.md`
-   - Claude: `CLAUDE.md` in KB root
-   - Cursor: `.cursorrules` in KB root
-3. Parse the skill index table in each bridge file
-4. Compare: flag if a skill exists in `skills/` but is missing from the bridge, or if the bridge references a deleted skill
-5. If out of sync → offer to regenerate (run `initialize-kb.md` Step 7)
+2. Parse the `## Skill Index` section in `AGENTS.md` (between auto-generated markers)
+3. If `~/.kiro/` exists, also check `~/.kiro/skills/worktrail/SKILL.md`
+4. Compare: flag if a skill exists in `skills/` but is missing from the index, or if the index references a deleted skill
+5. If out of sync → offer to regenerate (run `./scripts/generate-bridges.sh`)
 
 ## Output Format
 

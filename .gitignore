@@ -47,5 +47,6 @@ skills/*.md
 # Playwright MCP artifacts
 .playwright-mcp/
 
-# Local scripts
-scripts/
+# Local scripts (keep generate-bridges.sh tracked)
+scripts/*
+!scripts/generate-bridges.sh

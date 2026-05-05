@@ -43,6 +43,7 @@ Everything above is triggered by natural language. The agent decides which files
 │   │   ├── context.md                      #   scope, stakeholders, timeline
 │   │   └── {YYYY-MM-DD}.md                 #   daily updates
 │   └── finished/{YYYY}/{slug}/             # archived projects
+├── scripts/                                # internal tooling (generate-bridges.sh)
 ├── skills/                                 # reusable agent workflows
 ├── personal-workflows/
 │   ├── mr-reviews/                         # code review records
@@ -58,7 +59,13 @@ Everything above is triggered by natural language. The agent decides which files
 3. Answer a few questions (company, team, role).
 4. Start talking — "log my tasks today", "start a new project", "init my sprint".
 
-For **Kiro CLI** users, the setup also creates `~/.kiro/skills/worktrail/SKILL.md` — a bridge skill that auto-loads your KB context every session, regardless of working directory. **Claude Code**, **Cursor**, and other agents get equivalent bridge files (`CLAUDE.md`, `.cursorrules`) auto-detected during setup. If you add new skills later, say "update agent bridges" to regenerate the skill index.
+For **Kiro CLI** users, the setup also creates `~/.kiro/skills/worktrail/SKILL.md` — a bridge skill that auto-loads your KB context every session, regardless of working directory. **Claude Code**, **Cursor**, and other agents read `AGENTS.md` directly (it contains the skill index).
+
+**Claude Code:** `CLAUDE.md` is a symlink to `AGENTS.md` (Claude reads `CLAUDE.md` by default).
+
+**Bridge auto-update:** Whenever you add or remove a skill in `skills/`, the agent automatically regenerates the bridge's skill index. No manual "update agent bridges" command needed — the agent detects the change and syncs.
+
+**Path detection:** The bridge is generated using the actual KB root path (detected at runtime), not a hardcoded location. Clone the repo anywhere and setup will resolve paths correctly.
 
 ## Conventions
 

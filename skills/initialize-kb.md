@@ -106,37 +106,16 @@ people/.gitkeep
 
 ### Step 7: Create Agent Bridge Skill
 
-Scan `skills/*.md` to build the skill index dynamically:
+Run `./scripts/generate-bridges.sh` — this script:
 
-```
-for each file in skills/*.md:
-  read YAML front-matter → extract title, trigger
-  add row: { file: basename, title, trigger }
-```
+1. Detects KB root from its own location (no hardcoded paths)
+2. Scans `skills/*.md` → extracts `title` and `trigger` from YAML front-matter
+3. Updates the `## Skill Index` section in `AGENTS.md` (between auto-generated markers)
+4. If `~/.kiro/` exists, generates the Kiro bridge at `~/.kiro/skills/worktrail/SKILL.md` (needs absolute path since it lives outside the repo)
 
-Then create the bridge file for the user's AI agent:
+`AGENTS.md` is the universal instruction file — any agent that reads it gets the skill index. The Kiro bridge is the only external file needed (points back to the repo).
 
-| Agent | Bridge location | Format |
-|---|---|---|
-| Kiro CLI | `~/.kiro/skills/worktrail/SKILL.md` | Kiro SKILL.md with `---name/description---` front-matter |
-| Claude Code | `~/Documents/worktrail/CLAUDE.md` | Plain markdown (Claude reads from working dir) |
-| Cursor | `~/Documents/worktrail/.cursorrules` | Plain markdown |
-| Other | `~/Documents/worktrail/AGENTS.md` | Already exists — append skill index |
-
-Auto-detect which agents are installed:
-- `~/.kiro/` exists → create Kiro bridge
-- `claude` command exists → create CLAUDE.md
-- `~/.cursor/` exists → create .cursorrules
-- Always update AGENTS.md (universal fallback)
-
-The bridge content for all agents follows the same template:
-
-1. **Boot sequence:** Read `profile.md` and `AGENTS.md` on every session
-2. **Skill index:** Table generated from scanning `skills/*.md` front-matter (NOT hardcoded)
-3. **Key paths:** daily tasks, projects, people directories
-4. **Rules:** no credentials in files, resolve dates, suggest audits
-
-When the user adds a new skill later, re-scan and regenerate the bridge(s).
+When the user adds a new skill later, the agent runs `./scripts/generate-bridges.sh` again.
 
 ### Step 8: Confirm & Next Steps
 

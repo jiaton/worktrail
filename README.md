@@ -89,13 +89,26 @@ The agent does not watch your IDE, Slack, browser, or calendar by default. You d
 1. Clone this repo.
 2. Tell your AI agent: `Set up my knowledge base.`
 3. Answer a few questions about your company, team, role, repos, tools, and workflows.
-4. Start typing naturally:
+4. Teach it the parts of your workflow you repeat often:
+   - CLI commands you always run
+   - `gh` or GitLab commands you use for branches, MRs, reviews, and releases
+   - sprint init format, Jira fields, labels, and team-specific ticket conventions
+   - test accounts, test environments, URLs, reset steps, and common caveats
+   - review patterns, rollout steps, debugging habits, and screenshots you usually need
+5. Ask the agent to turn repeatable workflows into skills:
+   - `create a skill for my sprint init workflow`
+   - `save this MR review process as a reusable skill`
+   - `write a skill for setting up my test environment`
+   - `capture this release checklist as a skill`
+6. Start typing naturally:
    - `log my tasks today`
    - `start a new project`
    - `init my sprint`
    - `record this MR review`
    - `summarize my recent performance-review evidence`
    - `help me implement ticket ABC-123`
+
+The setup is meant to be collaborative. WorkTrail gives your agent the skeleton; you and the agent fill in the workflows that are specific to your job. If something is useful more than once, put it in `profile.md`, a project file, or a reusable skill in `skills/`.
 
 For Kiro CLI users, setup can create `~/.kiro/skills/worktrail/SKILL.md` so the KB context loads across working directories.
 
@@ -115,3 +128,7 @@ The full convention reference lives in [AGENTS.md](AGENTS.md). Short version:
 
 - An AI agent with filesystem access, such as Kiro, Claude Code, Cursor, or a similar local agent
 - Optional MCP servers for integrations such as Jira, Confluence, or Glean
+
+## License
+
+MIT

@@ -28,6 +28,24 @@ Ask: **"Will this fact still be true in 3+ months?"**
 
 ## Steps
 
+### Step 0: How to Query Glean
+
+When calling the Glean `chat` tool, prompt for **detailed, structured responses** — not high-level summaries. Glean defaults to human-friendly summaries, but the agent needs specifics.
+
+**Prompting rules:**
+- Ask for lists, names, dates, and concrete values — not overviews
+- Request tree/hierarchy format for org charts and structures
+- Ask for all items, not "top 3" or "key highlights"
+- If the first response is too vague, follow up with a more specific question
+
+**Examples:**
+
+Bad: "What's the release process?"
+Good: "What are the exact release days, code freeze times, and deploy schedule? Include specific days of the week and times with timezone."
+
+Bad: "Who's on the team?"
+Good: "List all engineers on the {{team}} team with their full names and titles. Show the reporting chain from IC to VP level."
+
 ### Step 1: Check if Already Cached
 
 Search local files for the fact:
@@ -41,8 +59,9 @@ If already present and accurate, stop — no action needed.
 
 | Fact type | Cache location |
 |-----------|---------------|
+| Company-wide facts (fiscal year, org acronyms, policies) | `profile.md` § Company Knowledge |
 | Person info (role, team, reporting) | `people/{person-slug}.md` |
-| Org/team structure, acronyms | `people/` or relevant project `context.md` |
+| Org/team structure, team mappings | `people/` or relevant project `context.md` |
 | Process or convention | `skills/{skill-slug}.md` |
 | Project-specific context | `projects/working-on/{slug}/context.md` |
 

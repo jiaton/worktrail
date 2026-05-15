@@ -10,7 +10,10 @@ Before acting on any request:
 
 1. Read `profile.md` — front-matter has instance config (`company`, `team`, `role`, `integrations`); body has personal context, current goals, and available tools with their MCP server mappings.
 2. Read `README.md` for conventions (naming, schemas, file sizes, lifecycle).
-3. Resolve all `{{placeholder}}` tokens using values from `profile.md` front-matter before writing any file.
+3. If `.onboarding-pending.md` exists, ask: "You have pending onboarding items. Want to continue setup?" If yes, run `skills/initialize-kb.md` in re-entry mode.
+4. Resolve all `{{placeholder}}` tokens using values from `profile.md` front-matter before writing any file.
+
+**Search rule:** Always search from the KB root (this repo) with no artificial depth limits. The repo is small — never constrain `max_depth` when looking for files or content.
 
 ---
 
@@ -53,6 +56,8 @@ If you make any structural change (rename directories, add new file types, chang
 
 When intent is ambiguous, ask one clarifying question before acting.
 
+**Notable Work prompt:** When closing a project OR recording significant progress on an active project, ask the user if the work is notable enough to add to `profile.md` § Notable Work. Keep entries concise (one line each).
+
 When unsure about people's full names, roles, org structure, or company knowledge, search Glean or Confluence user search before guessing. Check `people/` files first for cached info. Use Confluence user search for account IDs when writing Confluence pages with `@` mentions.
 
 After every ~10 file operations, suggest running the convention audit (`skills/convention-audit.md`). Don't block — just mention it.
@@ -78,7 +83,9 @@ These files live in `skills/`. Read the relevant one when the trigger matches.
 
 | Skill | File | Trigger |
 |---|---|---|
+| BCLI Teamspace Operations | `bcli.md` | User asks to deploy a branch, create/update/delete a teamspace, or check teamspace status |
 | Convention Audit | `convention-audit.md` | User asks to audit the knowledge base, or agent detects potential violations |
+| GitLab MCP Routing | `gitlab-mcp.md` | (no trigger defined) |
 | Glean Knowledge Cache | `glean-knowledge-cache.md` | Agent learns a new durable fact from a Glean search |
 | Initialize Knowledge Base | `initialize-kb.md` | User runs setup for the first time, or profile.md still contains {{placeholder}} tokens |
 | Jira Operations | `jira.md` | User asks to create tickets, init sprint, or query Jira |

@@ -1,9 +1,9 @@
 ---
 title: "Initialize Knowledge Base"
-date: "{{date}}"
+date: "2026-05-15"
 tags: ["workflow", "agent", "setup"]
 category: "skills"
-summary: "Interactive setup flow for new knowledge base users"
+summary: "Interactive setup flow for new knowledge base users with deferred setup support"
 trigger: "User runs setup for the first time, or profile.md still contains {{placeholder}} tokens"
 integration: ""
 related: []
@@ -17,16 +17,47 @@ Run this workflow when:
 - The agent detects `profile.md` contains unresolved `{{...}}` tokens
 - No `profile.md` exists at the knowledge base root
 - The user wants to add tools or skills after initial setup
+- `.onboarding-pending.md` exists (resume deferred setup)
 
 ## Re-entry
 
 If `profile.md` already exists and has no unresolved `{{...}}` tokens, this is a **partial re-run**. Skip steps the user has already completed:
 
 1. Check `profile.md` — if front-matter has `company`, `team`, `role` filled → skip Step 2
-2. Check `profile.md` `## Tools` — if tools already listed → ask "Want to add more tools, or skip?"
-3. Check `skills/` — if skill files exist → ask "Want to add more workflows, or skip?"
+2. Check `profile.md` `## Company Knowledge` — if filled → skip Step 3
+3. Check `profile.md` `## Tools` — if tools already listed → ask "Want to add more tools, or skip?"
+4. Check `skills/` — if skill files exist → ask "Want to add more workflows, or skip?"
 
 Jump directly to the first incomplete step.
+
+## Deferred Setup
+
+Users can defer any step by saying "later", "skip for now", or "I don't have the token yet".
+
+When anything is deferred:
+1. Create `.onboarding-pending.md` at the KB root (if it doesn't exist)
+2. Record what's pending with a checklist
+
+When the agent detects `.onboarding-pending.md` on startup, it should ask:
+> "You have pending onboarding items. Want to continue setup?"
+
+When all items are complete, **delete `.onboarding-pending.md`**.
+
+### `.onboarding-pending.md` format
+
+```markdown
+---
+title: "Onboarding Pending"
+created: YYYY-MM-DD
+---
+
+## Pending Items
+
+- [ ] Set up Jira MCP server (needs API token)
+- [ ] Set up Glean MCP server (needs API key)
+- [ ] Add sprint cadence to Company Knowledge
+- [ ] Define sprint init skill
+```
 
 ## Prerequisites
 
@@ -41,7 +72,7 @@ If any are missing, inform the user and stop.
 
 ### Step 1: Welcome & Explain
 
-> "This is a convention-driven personal knowledge base. I'll ask you a few questions to set up your profile and workflows, then you're ready to go."
+> "This is a convention-driven personal knowledge base. I'll ask you a few questions to set up your profile and workflows, then you're ready to go. You can defer anything you're not ready for — I'll track it and remind you later."
 
 ### Step 2: Collect Profile Info
 
@@ -56,18 +87,59 @@ Ask **one at a time**, waiting for each answer:
 
 If the user says "skip" to any optional question, use the placeholder text from the template.
 
-### Step 3: Collect Tool Integrations
+### Step 3: Collect Company Knowledge
 
-Ask: "What tools do you use that have MCP servers? (e.g., Jira, Confluence, Glean, GitHub, Slack)"
+Ask: "Let me learn some basics about your company so I don't have to look them up every session. You can answer directly, paste info, or if you've set up Glean I can search for these automatically."
 
-For each tool the user mentions:
-- Ask for the MCP server name
-- Ask for any key config values (e.g., Jira project key, board ID, custom fields)
+**If Glean MCP is configured (listed in `## Tools`):**
+> "I see you have Glean set up. Want me to search for company knowledge (fiscal year, sprint cadence, org chart, etc.) automatically? I'll confirm what I find before saving."
+
+If yes: search Glean for each item, present findings, let user confirm/correct, then save to `profile.md` § Company Knowledge.
+
+**If Glean is not configured, or user prefers manual:**
+
+Ask one at a time:
+
+1. **Fiscal year** — "When does your fiscal year start?"
+2. **Quarters** — "How are quarters structured?"
+3. **Sprint cadence** — "How long are your sprints? What day do they start?"
+4. **Release process** — "Any regular deploy days or freeze schedules?"
+5. **Org chart** — "Who's your manager? What's your reporting chain up to director/VP?"
+
+For any the user doesn't know, add to `.onboarding-pending.md` and note: "If you set up Glean later, I can search for these automatically."
+
+Fill answers into `profile.md` § Company Knowledge.
+
+### Step 4: Collect Tool Integrations
+
+Present recommended MCP servers:
+
+> "Here are MCP servers that unlock the most value with this KB:"
+>
+> | MCP Server | What it enables |
+> |---|---|
+> | **mcp-atlassian** | Sprint init, ticket creation, Confluence wiki search |
+> | **glean** | Company knowledge search + local caching |
+> | **notion** | Daily task sync to Notion |
+> | **google-workspace** | Calendar, docs, email integration |
+> | **playwright** / **chrome-devtools** | Browser automation |
+> | **gitlab** / **github** | Code review tracking, MR/PR management |
+>
+> "Which of these do you use or want to set up? You can also add others not on this list."
+
+For each tool the user wants:
+- Ask for the MCP server name (suggest from table if applicable)
+- Ask for key config values (e.g., Jira project key, board ID, custom fields)
 - Record under `## Tools` in `profile.md`
 
-If the user doesn't know or says "none", skip — tools can be added later.
+**If the user says "I want X but don't have the token/credentials yet":**
+- Add the tool to `profile.md` § Tools with a `# TODO: needs token` comment
+- Add to `.onboarding-pending.md`: `- [ ] Set up {tool} MCP server (needs credentials)`
+- Tell the user: "I've noted it. When you have the credentials, just say 'continue setup' and I'll help you finish."
 
-### Step 4: Collect Workflows for Skills
+If the user says "none" or "later" for all tools, skip — tools can be added anytime.
+
+### Step 5: Collect Workflows for Skills
 
 Ask: "What recurring workflows do you want the agent to handle? For example:"
 - Sprint initialization (pull tickets, map to projects)
@@ -83,14 +155,15 @@ For each workflow the user describes:
 
 If the user says "none" or "later", skip — skills can be added anytime.
 
-### Step 5: Create profile.md
+### Step 6: Create profile.md
 
 1. Copy `templates/profile.md` to the root
 2. Replace all `{{placeholder}}` tokens with collected values
-3. Fill in body sections with optional context
+3. Fill in body sections with collected context
 4. Add tool integrations under `## Tools`
+5. Add company knowledge under `## Company Knowledge`
 
-### Step 6: Scaffold Directories
+### Step 7: Scaffold Directories
 
 Ensure all required directories exist with `.gitkeep` files:
 
@@ -104,7 +177,7 @@ personal-workflows/interactions/.gitkeep
 people/.gitkeep
 ```
 
-### Step 7: Create Agent Bridge Skill
+### Step 8: Create Agent Bridge Skill
 
 Run `./scripts/generate-bridges.sh` — this script:
 
@@ -117,13 +190,16 @@ Run `./scripts/generate-bridges.sh` — this script:
 
 When the user adds a new skill later, the agent runs `./scripts/generate-bridges.sh` again.
 
-### Step 8: Confirm & Next Steps
+### Step 9: Confirm & Next Steps
 
 > "You're all set! Here's what I created:"
 > - `profile.md` — your config and tools
 > - Directory structure — ready for content
 > - Skills: {list created skill files, or "none yet"}
 > - Agent bridges: {list which bridges were created based on detected agents}
+> {if .onboarding-pending.md exists:}
+> - **Pending items** — say "continue setup" anytime to finish these:
+>   {list pending items}
 >
 > "Try these:"
 > - "Log my tasks for today"

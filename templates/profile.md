@@ -27,6 +27,14 @@ Brief background — teams, domains, or experience areas.
 - Highlight 1
 - Highlight 2
 
+## Company Knowledge
+
+- Fiscal year starts: (month)
+- Quarters: (structure)
+- Sprint cadence: (length, start day)
+- Release process: (deploy days, freeze schedule)
+- Org chart: (your reporting chain)
+
 ## Tools
 
 ### Tool Name

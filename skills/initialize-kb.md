@@ -88,18 +88,39 @@ After collecting profile info, check what MCP servers are already available to t
 
 Inspect available tools and report:
 
-> "I currently have access to: {list connected MCP servers, e.g., mcp-atlassian, glean, google-workspace, notion}."
+> "I currently have access to: {list connected MCP servers}."
 >
-> "Based on your role, these additional integrations would be useful:"
-> {list relevant suggestions not yet connected — e.g., if they mentioned GitLab repos but no gitlab MCP, suggest it}
+> "Based on what you described, these integrations would be useful:"
+> {list relevant suggestions not yet connected — e.g., if they mentioned Jira but no mcp-atlassian}
 >
 > "Want me to help set any of these up?"
 
 **If the user wants to set up an MCP server:**
 
-1. Ask for the required credentials (API token, base URL, etc.) or environment variable names if they prefer to use env vars
-2. Write the MCP server entry into the agent's config file (the agent knows its own config location)
-3. Verify the connection works by attempting a simple call (e.g., list projects for Jira, search for the user's name in Glean)
+1. Ask for the required credentials (API token, base URL, etc.)
+2. Write credentials as `export` statements to the user's shell init file (`~/.zshrc`, `~/.bashrc`, etc. — detect from `$SHELL`). This keeps secrets out of the MCP config and makes them available to all sessions.
+3. Write the MCP server entry to the agent's config file using `${env:VAR_NAME}` references for credentials.
+4. Tell the user to restart their shell (or `source` the rc file) and restart the agent for the new server to load.
+
+If the agent doesn't know the exact package name or command for a server, ask the user or search for it. Common patterns:
+- Python packages: `"command": "uvx", "args": ["package-name"]`
+- Node packages: `"command": "npx", "args": ["-y", "package-name"]`
+- Local binaries: `"command": "/path/to/binary", "args": [...]`
+
+Common MCP servers and their configurations:
+
+| Server | Use case | Command | Args | Required Env |
+|---|---|---|---|---|
+| mcp-atlassian | Jira + Confluence | `uvx` | `mcp-atlassian` | JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN, CONFLUENCE_URL, CONFLUENCE_USERNAME, CONFLUENCE_API_TOKEN |
+| glean | Company knowledge search | `npx` | `-y @gleanwork/local-mcp-server` | GLEAN_SERVER_URL, GLEAN_API_TOKEN |
+| notion | Notes, task sync | `npx` | `-y @notionhq/notion-mcp-server` | NOTION_TOKEN |
+| google-workspace | Calendar, Docs, Sheets, Gmail | `uvx` | `workspace-mcp --transport streamable-http` | (OAuth-based, runs as local HTTP server on port 8000) |
+| playwright | Browser automation | `npx` | `-y @playwright/mcp` | (none) |
+| chrome-devtools | Browser debugging, Lighthouse | `npx` | `-y chrome-devtools-mcp@latest` | (none) |
+| gitlab | GitLab MRs, pipelines | `npx` | `mcp-remote https://{gitlab-host}/api/v4/mcp` | (uses glab auth) |
+| glab | GitLab CLI | `glab` | `mcp serve` | (uses glab auth) |
+
+**Stdio vs HTTP servers:** Stdio servers (`uvx`, `npx`) start fresh with each agent session — simple but have cold-start latency. HTTP servers (like `workspace-mcp`) run in the background and connect instantly, but need to be started separately (e.g., via launchd or a background process).
 
 **If the user says "I don't have the token yet":**
 - Add to `.onboarding-pending.md`: `- [ ] Set up {tool} MCP server (needs credentials)`

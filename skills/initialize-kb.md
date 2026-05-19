@@ -21,14 +21,12 @@ Run this workflow when:
 
 ## Re-entry
 
-If `profile.md` already exists and has no unresolved `{{...}}` tokens, this is a **partial re-run**. Skip steps the user has already completed:
+If `profile.md` already exists and has no unresolved `{{...}}` tokens, this is a **partial re-run**:
 
-1. Check `profile.md` — if front-matter has `company`, `team`, `role` filled → skip Step 2
-2. Check `profile.md` `## Company Knowledge` — if filled → skip Step 3
-3. Check `profile.md` `## Tools` — if tools already listed → ask "Want to add more tools, or skip?"
-4. Check `skills/` — if skill files exist → ask "Want to add more workflows, or skip?"
+1. Check `profile.md` — if front-matter has `company`, `team`, `role` filled → skip Step 1
+2. Check if the agent's own bridge already exists → if yes, setup is complete; ask if they want to update anything
 
-Jump directly to the first incomplete step.
+If the profile exists but no bridge exists for the current agent, jump directly to Step 4 (create bridge).
 
 ## Deferred Setup
 
@@ -70,92 +68,46 @@ If any are missing, inform the user and stop.
 
 ## Steps
 
-### Step 1: Welcome & Explain
+### Step 1: Welcome & Collect Basics
 
-> "This is a convention-driven personal knowledge base. I'll ask you a few questions to set up your profile and workflows, then you're ready to go. You can defer anything you're not ready for — I'll track it and remind you later."
+Present a single prompt:
 
-### Step 2: Collect Profile Info
-
-Ask **one at a time**, waiting for each answer:
-
-1. **Company** — "What company do you work at?"
-2. **Team** — "What team are you on?"
-3. **Role** — "What's your current role/title?"
-4. **Background** (optional) — "Any brief background? (teams, domains, experience)"
-5. **Current goals** (optional) — "Any goals you're working toward?"
-6. **Notable work** (optional) — "Any highlights worth noting?"
-
-If the user says "skip" to any optional question, use the placeholder text from the template.
-
-### Step 3: Collect Company Knowledge
-
-Ask: "Let me learn some basics about your company so I don't have to look them up every session. You can answer directly, paste info, or if you've set up Glean I can search for these automatically."
-
-**If Glean MCP is configured (listed in `## Tools`):**
-> "I see you have Glean set up. Want me to search for company knowledge (fiscal year, sprint cadence, org chart, etc.) automatically? I'll confirm what I find before saving."
-
-If yes: search Glean for each item, present findings, let user confirm/correct, then save to `profile.md` § Company Knowledge.
-
-**If Glean is not configured, or user prefers manual:**
-
-Ask one at a time:
-
-1. **Fiscal year** — "When does your fiscal year start?"
-2. **Quarters** — "How are quarters structured?"
-3. **Sprint cadence** — "How long are your sprints? What day do they start?"
-4. **Release process** — "Any regular deploy days or freeze schedules?"
-5. **Org chart** — "Who's your manager? What's your reporting chain up to director/VP?"
-
-For any the user doesn't know, add to `.onboarding-pending.md` and note: "If you set up Glean later, I can search for these automatically."
-
-Fill answers into `profile.md` § Company Knowledge.
-
-### Step 4: Collect Tool Integrations
-
-Present recommended MCP servers:
-
-> "Here are MCP servers that unlock the most value with this KB:"
+> "This is a personal knowledge base that grows as you work. I'll remember your projects, workflows, reviews, and context across sessions so you don't have to repeat yourself."
 >
-> | MCP Server | What it enables |
-> |---|---|
-> | **mcp-atlassian** | Sprint init, ticket creation, Confluence wiki search |
-> | **glean** | Company knowledge search + local caching |
-> | **notion** | Daily task sync to Notion |
-> | **google-workspace** | Calendar, docs, email integration |
-> | **playwright** / **chrome-devtools** | Browser automation |
-> | **gitlab** / **github** | Code review tracking, MR/PR management |
+> "To get started, tell me a bit about yourself — your company, team, role, and anything else you'd like me to know. Everything else fills in naturally as we work together."
+
+Wait for the user's response, then parse it into `profile.md`. Accept natural language — the user doesn't need to structure anything. Extract whatever they provide (role, repos, people, tools, conventions) and put it in the right sections.
+
+If something is ambiguous, ask **one** clarifying follow-up at most. Don't prompt for things they didn't mention — those will come up organically in future sessions.
+
+### Step 1b: MCP Server Discovery & Setup
+
+After collecting profile info, check what MCP servers are already available to the agent. Use the agent's own tool list to determine which integrations are currently connected.
+
+> "Let me check what tools I already have access to..."
+
+Inspect available tools and report:
+
+> "I currently have access to: {list connected MCP servers, e.g., mcp-atlassian, glean, google-workspace, notion}."
 >
-> "Which of these do you use or want to set up? You can also add others not on this list."
+> "Based on your role, these additional integrations would be useful:"
+> {list relevant suggestions not yet connected — e.g., if they mentioned GitLab repos but no gitlab MCP, suggest it}
+>
+> "Want me to help set any of these up?"
 
-For each tool the user wants:
-- Ask for the MCP server name (suggest from table if applicable)
-- Ask for key config values (e.g., Jira project key, board ID, custom fields)
-- Record under `## Tools` in `profile.md`
+**If the user wants to set up an MCP server:**
 
-**If the user says "I want X but don't have the token/credentials yet":**
-- Add the tool to `profile.md` § Tools with a `# TODO: needs token` comment
+1. Ask for the required credentials (API token, base URL, etc.) or environment variable names if they prefer to use env vars
+2. Write the MCP server entry into the agent's config file (the agent knows its own config location)
+3. Verify the connection works by attempting a simple call (e.g., list projects for Jira, search for the user's name in Glean)
+
+**If the user says "I don't have the token yet":**
 - Add to `.onboarding-pending.md`: `- [ ] Set up {tool} MCP server (needs credentials)`
-- Tell the user: "I've noted it. When you have the credentials, just say 'continue setup' and I'll help you finish."
+- Tell them: "Just say 'continue setup' when you have it."
 
-If the user says "none" or "later" for all tools, skip — tools can be added anytime.
+Record all configured tools under `## Tools` in `profile.md` with their MCP server name and key config values (project keys, board IDs, custom field IDs, etc.).
 
-### Step 5: Collect Workflows for Skills
-
-Ask: "What recurring workflows do you want the agent to handle? For example:"
-- Sprint initialization (pull tickets, map to projects)
-- Ticket creation with custom fields
-- Machine migration checklists
-- Code review tracking
-- Anything you do repeatedly that could be a reusable instruction
-
-For each workflow the user describes:
-1. Ask clarifying questions to understand the trigger, steps, and expected output
-2. Create a skill file using `templates/skill.md` at `skills/{workflow-slug}.md`
-3. Fill in the trigger, steps, inputs, and output format based on the conversation
-
-If the user says "none" or "later", skip — skills can be added anytime.
-
-### Step 6: Create profile.md
+### Step 2: Create profile.md
 
 1. Copy `templates/profile.md` to the root
 2. Replace all `{{placeholder}}` tokens with collected values
@@ -163,7 +115,7 @@ If the user says "none" or "later", skip — skills can be added anytime.
 4. Add tool integrations under `## Tools`
 5. Add company knowledge under `## Company Knowledge`
 
-### Step 7: Scaffold Directories
+### Step 3: Scaffold Directories
 
 Ensure all required directories exist with `.gitkeep` files:
 
@@ -177,20 +129,12 @@ personal-workflows/interactions/.gitkeep
 people/.gitkeep
 ```
 
-### Step 8: Create Agent Bridge Skill
+### Step 4: Create Agent Bridge
 
-Run `./scripts/generate-bridges.sh` — this script:
+1. Run `./scripts/generate-bridges.sh` to update the `## Skill Index` in `AGENTS.md`.
+2. Create a bridge skill/instruction in the agent's own skill directory that points back to this KB root. The bridge should instruct the agent to read `profile.md` and `AGENTS.md` on every session start, include the skill index, and list key paths (daily tasks, projects, people). The agent knows where its own skills live — create the file there.
 
-1. Detects KB root from its own location (no hardcoded paths)
-2. Scans `skills/*.md` → extracts `title` and `trigger` from YAML front-matter
-3. Updates the `## Skill Index` section in `AGENTS.md` (between auto-generated markers)
-4. If `~/.kiro/` exists, generates the Kiro bridge at `~/.kiro/skills/worktrail/SKILL.md` (needs absolute path since it lives outside the repo)
-
-`AGENTS.md` is the universal instruction file — any agent that reads it gets the skill index. The Kiro bridge is the only external file needed (points back to the repo).
-
-When the user adds a new skill later, the agent runs `./scripts/generate-bridges.sh` again.
-
-### Step 9: Confirm & Next Steps
+### Step 5: Confirm & Next Steps
 
 > "You're all set! Here's what I created:"
 > - `profile.md` — your config and tools

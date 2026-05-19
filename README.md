@@ -114,6 +114,12 @@ For Kiro CLI users, setup can create `~/.kiro/skills/worktrail/SKILL.md` so the 
 
 Claude Code, Cursor, and other agents read `AGENTS.md` directly. `CLAUDE.md` is a symlink to `AGENTS.md` because Claude Code reads `CLAUDE.md` by default.
 
+### Agent Bridge
+
+During setup, the agent creates a "bridge" — a small file in its own skill/instruction directory that points back to this repo. This lets the agent load your KB context regardless of your current working directory.
+
+If you switch to a different agent (e.g., from Kiro to Claude Code), open the WorkTrail repo directory and tell the new agent: `Set up my knowledge base.` It will read `AGENTS.md`, detect that `profile.md` already exists, and create its own bridge. The KB itself is agent-agnostic — only the bridge is platform-specific.
+
 ## Conventions
 
 The full convention reference lives in [AGENTS.md](AGENTS.md). Short version:

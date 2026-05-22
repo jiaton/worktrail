@@ -8,6 +8,8 @@ trigger: "User asks to audit the knowledge base, or agent detects potential viol
 integration: ""
 related: []
 needs-split: false
+slash_command: true
+command_name: "worktrail-convention-audit"
 ---
 
 ## Trigger

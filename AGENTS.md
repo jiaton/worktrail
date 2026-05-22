@@ -15,13 +15,15 @@ Before acting on any request:
 
 **Search rule:** Always search from the KB root (this repo) with no artificial depth limits. The repo is small — never constrain `max_depth` when looking for files or content.
 
+**Search strategy:** Directory and file names are the primary index. When looking something up, **list the relevant directory first** (e.g., `projects/working-on/`) to match by name — the user may abbreviate or misspell. Use `grep` only for content inside files (ticket IDs, tags, terms), not for finding projects/people/files by name.
+
 ---
 
 ## Architecture
 
 - `profile.md` — who the user is, their role, goals, and available tools (with MCP server names)
 - `templates/` — blank templates for every file type, including `profile.md` for bootstrapping new instances
-- `skills/` — reusable agent procedures (convention audit, sprint init, etc.)
+- `skills/` — reusable agent procedures (convention audit, sprint init, etc.). **Never invoke these via `Skill()` or as slash commands — read the file directly as context when the trigger matches.**
 - `projects/` — active and finished project records
 - `daily-tasks/` — optional daily task logs
 - `personal-workflows/` — records of events (MR reviews, interaction summaries)
@@ -48,10 +50,11 @@ If you make any structural change (rename directories, add new file types, chang
 | Log an MR review | Create `personal-workflows/mr-reviews/{TICKET-ID}.md` |
 | Log an interaction | Create `personal-workflows/interactions/{person-slug}-{YYYY-MM-DD}.md` |
 | Add/update a person note | Create or update `people/{person-slug}.md` |
-| Define a new skill | Create `skills/{skill-slug}.md` → **then run `./scripts/generate-bridges.sh`** |
+| Define a new skill | Create `skills/{skill-slug}.md` → **then run `./scripts/generate-bridges.sh`** (and `./scripts/generate-claude-bridges.sh` if `slash_command: true`) |
 | Update agent bridges | Run `./scripts/generate-bridges.sh` (re-scans `skills/*.md` front-matter, regenerates all bridges) |
+| Update Claude commands | Run `./scripts/generate-claude-bridges.sh` (regenerates `.claude/commands/*.md` for skills with `slash_command: true`) |
 | Add/update a tool integration | Update `profile.md` `## Tools` section; if the tool enables a workflow, offer to create a skill |
-| Query stored knowledge | Use `find` / `grep` on front-matter fields |
+| Query stored knowledge | Follow the **Search Strategy** section above |
 | Audit conventions | Execute `skills/convention-audit.md` |
 
 When intent is ambiguous, ask one clarifying question before acting.
@@ -87,7 +90,8 @@ These files live in `skills/`. Read the relevant one when the trigger matches.
 | Convention Audit | `convention-audit.md` | User asks to audit the knowledge base, or agent detects potential violations |
 | GitLab MCP Routing | `gitlab-mcp.md` | (no trigger defined) |
 | Glean Knowledge Cache | `glean-knowledge-cache.md` | Agent learns a new durable fact from a Glean search |
-| Initialize Knowledge Base | `initialize-kb.md` | User runs setup for the first time, or profile.md still contains {{placeholder}} tokens |
+| Initialize Knowledge Base
+Onboarding Pending | `initialize-kb.md` | User runs setup for the first time, or profile.md still contains {{placeholder}} tokens |
 | Jira Operations | `jira.md` | User asks to create tickets, init sprint, or query Jira |
 | Mac Migration Workflow | `mac-migration.md` | When setting up a new Mac or transferring data between machines |
 | Test Accounts | `test-accounts.md` | Need test credentials, add/update test accounts, look up environment URLs |

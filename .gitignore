@@ -31,13 +31,9 @@ personal-workflows/mr-reviews/*.md
 
 personal-workflows/performance-review/
 
-# Personal skills — generic skills (convention-audit, initialize-kb, glean-knowledge-cache) are tracked
-skills/*.md
-!skills/.gitkeep
-!skills/convention-audit.md
-!skills/initialize-kb.md
-!skills/glean-knowledge-cache.md
-!skills/jira.md
+# Skills — only example template is tracked; personal skills stay local
+skills/*/
+!skills/example/
 
 # PNG screenshots (temp testing artifacts)
 *.png
@@ -47,6 +43,7 @@ skills/*.md
 # Playwright MCP artifacts
 .playwright-mcp/
 
-# Local scripts (keep generate-bridges.sh tracked)
+# Scripts — setup and inject scripts are tracked; personal/generated scripts stay local
 scripts/*
-!scripts/generate-bridges.sh
+!scripts/setup-claude-skills.sh
+!scripts/inject-profile.sh

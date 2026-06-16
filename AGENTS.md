@@ -10,7 +10,7 @@ Before acting on any request:
 
 1. Read `profile.md` — front-matter has instance config (`company`, `team`, `role`, `integrations`); body has personal context, current goals, and available tools with their MCP server mappings.
 2. Read `README.md` for conventions (naming, schemas, file sizes, lifecycle).
-3. If `.onboarding-pending.md` exists, ask: "You have pending onboarding items. Want to continue setup?" If yes, run `skills/initialize-kb.md` in re-entry mode.
+3. If `.onboarding-pending.md` exists, ask: "You have pending onboarding items. Want to continue setup?" If yes, run `skills/initialize-kb/SKILL.md` in re-entry mode.
 4. Resolve all `{{placeholder}}` tokens using values from `profile.md` front-matter before writing any file.
 
 **Search rule:** Always search from the KB root (this repo) with no artificial depth limits. The repo is small — never constrain `max_depth` when looking for files or content.
@@ -23,7 +23,7 @@ Before acting on any request:
 
 - `profile.md` — who the user is, their role, goals, and available tools (with MCP server names)
 - `templates/` — blank templates for every file type, including `profile.md` for bootstrapping new instances
-- `skills/` — reusable agent procedures (convention audit, sprint init, etc.). **Never invoke these via `Skill()` or as slash commands — read the file directly as context when the trigger matches.**
+- `skills/` — reusable agent procedures. Each skill lives at `skills/{name}/SKILL.md`. Read the relevant one directly when its trigger matches — never invoke via `Skill()` or slash commands.
 - `projects/` — active and finished project records
 - `daily-tasks/` — optional daily task logs
 - `personal-workflows/` — records of events (MR reviews, interaction summaries)
@@ -40,30 +40,41 @@ If you make any structural change (rename directories, add new file types, chang
 
 ## Decision Flow
 
-| User intent | Action |
-|-------------|--------|
-| Log today's tasks / meetings / notes | Create or update `daily-tasks/{YYYY}/{MM}/{YYYY-MM-DD}.md` **+ append to Notion** (see `skills/jira.md` § Notion Daily Tasks Sync) |
-| Record work on a project | Create or update `projects/working-on/{slug}/{YYYY-MM-DD}.md` **+ append to Notion** (see `skills/jira.md` § Notion Daily Tasks Sync) |
+A single request often triggers multiple actions. Don't treat this as a lookup table — treat it as a cascade. After any primary action, always evaluate what else should fire.
+
+### Primary actions
+
+| User intent | Primary action |
+|-------------|----------------|
+| Log today's tasks / meetings / notes | Create or update `daily-tasks/{YYYY}/{MM}/{YYYY-MM-DD}.md` |
+| Record work on a project | Create or update `projects/working-on/{slug}/{YYYY-MM-DD}.md` |
+| Update project context / docs only | Update `projects/working-on/{slug}/context.md` |
 | Start a new project | Create `projects/working-on/{slug}/context.md` |
 | Record a staging event | Create `projects/working-on/{slug}/staging-{stage}-{YYYY-MM-DD}.md` |
 | Close out a project | Create `lessons-{YYYY-MM-DD}.md`, move dir to `projects/finished/{YYYY}/{slug}/` |
 | Log an MR review | Create `personal-workflows/mr-reviews/{TICKET-ID}.md` |
 | Log an interaction | Create `personal-workflows/interactions/{person-slug}-{YYYY-MM-DD}.md` |
 | Add/update a person note | Create or update `people/{person-slug}.md` |
-| Define a new skill | Create `skills/{skill-slug}.md` → **then run `./scripts/generate-bridges.sh`** (and `./scripts/generate-claude-bridges.sh` if `slash_command: true`) |
-| Update agent bridges | Run `./scripts/generate-bridges.sh` (re-scans `skills/*.md` front-matter, regenerates all bridges) |
-| Update Claude commands | Run `./scripts/generate-claude-bridges.sh` (regenerates `.claude/commands/*.md` for skills with `slash_command: true`) |
-| Add/update a tool integration | Update `profile.md` `## Tools` section; if the tool enables a workflow, offer to create a skill |
+| Define a new skill | Create `skills/{skill-slug}/SKILL.md` → run `./scripts/setup-claude-skills.sh` to symlink into `~/.claude/skills/my-{name}` |
+| Add/update a tool integration | Update `profile.md` `## Tools` section; offer to create a skill if it enables a workflow |
 | Query stored knowledge | Follow the **Search Strategy** section above |
-| Audit conventions | Execute `skills/convention-audit.md` |
+| Audit conventions | Read `skills/convention-audit/SKILL.md` and execute |
+
+### Cascade rules (always evaluate after primary action)
+
+1. **Notion sync** — if work happened (tasks completed, decisions made, progress made), append to Notion (see `skills/jira/SKILL.md` § Notion Daily Tasks Sync). Skip for doc reorganization, context-only edits, or structural KB changes.
+
+2. **Notable Work** — if work is significant (shipped something, unblocked a project, completed a major task), ask: "Is this worth adding to `profile.md` § Notable Work?" Keep entries one line.
+
+3. **daily-tasks** — if project work was logged but no daily-tasks entry exists for today, create one summarizing the session.
+
+4. **context.md freshness** — if project work changes the technical approach, status, or decisions, update `context.md` to reflect current state.
 
 When intent is ambiguous, ask one clarifying question before acting.
 
-**Notable Work prompt:** When closing a project OR recording significant progress on an active project, ask the user if the work is notable enough to add to `profile.md` § Notable Work. Keep entries concise (one line each).
-
 When unsure about people's full names, roles, org structure, or company knowledge, search Glean or Confluence user search before guessing. Check `people/` files first for cached info. Use Confluence user search for account IDs when writing Confluence pages with `@` mentions.
 
-After every ~10 file operations, suggest running the convention audit (`skills/convention-audit.md`). Don't block — just mention it.
+After every ~10 file operations, suggest running the convention audit (`skills/convention-audit/SKILL.md`). Don't block — just mention it.
 
 ---
 
@@ -78,24 +89,13 @@ After every ~10 file operations, suggest running the convention audit (`skills/c
 
 ---
 
-## Skill Index
+## Skills
 
-<!-- AUTO-GENERATED by ./scripts/generate-bridges.sh — do not edit manually -->
+Skills live in `skills/{name}/SKILL.md`. Read the relevant one when its trigger matches. Don't load all upfront.
 
-These files live in `skills/`. Read the relevant one when the trigger matches.
-
-| Skill | File | Trigger |
+| Skill | Path | Trigger |
 |---|---|---|
-| BCLI Teamspace Operations | `bcli.md` | User asks to deploy a branch, create/update/delete a teamspace, or check teamspace status |
-| Convention Audit | `convention-audit.md` | User asks to audit the knowledge base, or agent detects potential violations |
-| GitLab MCP Routing | `gitlab-mcp.md` | (no trigger defined) |
-| Glean Knowledge Cache | `glean-knowledge-cache.md` | Agent learns a new durable fact from a Glean search |
-| Initialize Knowledge Base
-Onboarding Pending | `initialize-kb.md` | User runs setup for the first time, or profile.md still contains {{placeholder}} tokens |
-| Jira Operations | `jira.md` | User asks to create tickets, init sprint, or query Jira |
-| Mac Migration Workflow | `mac-migration.md` | When setting up a new Mac or transferring data between machines |
-| Test Accounts | `test-accounts.md` | Need test credentials, add/update test accounts, look up environment URLs |
-
-<!-- END SKILL INDEX -->
-
-Only read a skill file when its trigger matches. Don't load all of them upfront.
+| Convention Audit | `skills/convention-audit/SKILL.md` | User asks to audit the knowledge base, or agent detects potential violations |
+| Initialize Knowledge Base | `skills/initialize-kb/SKILL.md` | User runs setup for the first time, or profile.md still contains {{placeholder}} tokens |
+| Example | `skills/example/SKILL.md` | Template — copy to create a new skill |
+| *(your skills)* | `skills/{name}/SKILL.md` | *(defined per-instance in profile.md § Tools)* |

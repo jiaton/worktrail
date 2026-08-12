@@ -23,7 +23,7 @@ Before acting on any request:
 
 - `profile.md` — who the user is, their role, goals, and available tools (with MCP server names)
 - `templates/` — blank templates for every file type, including `profile.md` for bootstrapping new instances
-- `skills/` — reusable agent procedures. Each skill lives at `skills/{name}/SKILL.md`. Read the relevant one directly when its trigger matches — never invoke via `Skill()` or slash commands.
+- `skills/` — reusable agent procedures. Each skill lives at `skills/{name}/SKILL.md`. Read the relevant one directly when its trigger matches — never invoke via `Skill()` or slash commands. Frontmatter MUST include `name` and `description` — these are the fields Claude Code/Codex/other agents read for auto-discovery when the skill is symlinked into an agent's skills dir (`~/.claude/skills/`, `~/.codex/skills/`). The KB's own `trigger`/`summary` fields are cosmetic to external tools; only `name`/`description` drive matching.
 - `projects/` — active and finished project records
 - `daily-tasks/` — optional daily task logs
 - `personal-workflows/` — records of events (MR reviews, interaction summaries)
@@ -82,7 +82,8 @@ After every ~10 file operations, suggest running the convention audit (`skills/c
 
 - [ ] **Date resolved** — before creating any file that requires a date in its path or front-matter, resolve the current date and timezone via `date`. Do not assume or ask the user.
 - [ ] Path and filename match the naming convention in `README.md`
-- [ ] YAML front-matter has all required common fields: `title`, `date`, `tags`, `category`, `summary`, `related`, `needs-split`
+- [ ] YAML front-matter has all required common fields: `title`, `date`, `summary`, `related`, `needs-split`
+- [ ] For `skills/{name}/SKILL.md` specifically, front-matter is a different, smaller schema — only: `name` (matches dir slug, drives auto-discovery), `description` (agent-facing, drives auto-discovery), `trigger` (shown in the Skill Index table below), `integration` (which MCP/CLI it depends on, checked by convention-audit). Do NOT add `title`, `summary`, `category`, `tags`, `related`, or `date` to skill front-matter — no tool reads them and they only duplicate `name`/`description`.
 - [ ] No `{{placeholder}}` tokens remain — all resolved from `profile.md` front-matter
 - [ ] All required body sections present for the file type
 - [ ] File is within the size limit for its type

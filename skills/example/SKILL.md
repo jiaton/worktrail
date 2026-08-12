@@ -1,13 +1,8 @@
 ---
-title: "Example Skill"
-date: "{{date}}"
-tags: ["skill"]
-category: "skills"
-summary: "One-line description of what this skill does"
+name: "{{skill-slug}}"
+description: "One-line description of what this skill does and when to use it — this is what Claude Code/Codex use for auto-discovery, so name it and describe its trigger explicitly."
 trigger: "Describe when the agent should load and execute this skill"
 integration: ""
-related: []
-needs-split: false
 ---
 
 ## Trigger

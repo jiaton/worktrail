@@ -1,8 +1,6 @@
 ---
 title: "MR Review: {{ticket-id}}"
 date: "{{date}}"
-tags: ["mr-review"]
-category: "mr-review"
 summary: "One-line review summary"
 ticket-id: "{{ticket-id}}"
 repository: "{{repo-name}}"

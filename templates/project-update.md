@@ -1,8 +1,6 @@
 ---
 title: "Update: {{project-name}} - {{date}}"
 date: "{{date}}"
-tags: ["project"]
-category: "update"
 summary: "One-line update summary"
 project: "{{project-slug}}"
 source: "direct"

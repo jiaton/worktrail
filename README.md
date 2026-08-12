@@ -125,7 +125,7 @@ If you switch to a different agent (e.g., from Kiro to Claude Code), open the Wo
 The full convention reference lives in [AGENTS.md](AGENTS.md). Short version:
 
 - Slugs use kebab-case.
-- Content files use YAML front-matter with `title`, `date`, `tags`, `category`, and `summary`.
+- Content files use YAML front-matter with `title`, `date`, and `summary`. Skills (`skills/*/SKILL.md`) use a different, smaller schema — just `name`, `description`, `trigger`, `integration`.
 - Content files have a 200-line limit; skills are exempt.
 - Active projects live in `projects/working-on/`; completed projects move to `projects/finished/{YYYY}/`.
 - Skills live in `skills/` and act like reusable agent playbooks.

@@ -1,8 +1,6 @@
 ---
 title: "Interaction: {{person-name}} - {{date}}"
 date: "{{date}}"
-tags: ["interaction"]
-category: "interaction"
 summary: "One-line interaction summary"
 person: "{{person-slug}}"
 related: []

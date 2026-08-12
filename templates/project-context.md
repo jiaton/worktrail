@@ -1,8 +1,6 @@
 ---
 title: "Project: {{project-name}}"
 date: "{{date}}"
-tags: ["project"]
-category: "context"
 summary: "One-line project objective"
 status: "active"
 stakeholders: []

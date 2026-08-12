@@ -1,8 +1,6 @@
 ---
 title: "{{person-name}}"
 date: "{{date}}"
-tags: ["people"]
-category: "people"
 summary: "One-line characterization"
 person: "{{person-slug}}"
 role: "{{person-role}}"

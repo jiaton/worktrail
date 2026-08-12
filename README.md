@@ -120,6 +120,8 @@ During setup, the agent creates a "bridge" — a small file in its own skill/ins
 
 If you switch to a different agent (e.g., from Kiro to Claude Code), open the WorkTrail repo directory and tell the new agent: `Set up my knowledge base.` It will read `AGENTS.md`, detect that `profile.md` already exists, and create its own bridge. The KB itself is agent-agnostic — only the bridge is platform-specific.
 
+**For Claude Code, the bridge is a `SessionStart` hook** (`scripts/inject-profile.sh`, registered in `~/.claude/settings.json`). It fires at the start of every session, from any directory, and injects: your full `profile.md`, the active-project and people-note lists, and the Architecture + Decision Flow sections from `AGENTS.md`. That's what lets you ask "what am I working on?" from a totally unrelated folder and get a real answer. Skills work the same way — `scripts/setup-claude-skills.sh` symlinks `skills/{name}/SKILL.md` into `~/.claude/skills/my-{name}`, so Claude Code auto-discovers them via `name`/`description`. Both the hook file and skill files are **symlinks into this repo**, not copies — edit the source once, every future session picks it up.
+
 ## Conventions
 
 The full convention reference lives in [AGENTS.md](AGENTS.md). Short version:
